@@ -27,8 +27,8 @@ class TdSprite(pygame.sprite.Sprite):
 
         # Fetch the rectangle object that has the dimensions of the image.
         self.rect = self.image.get_rect()
-        self.rect.x = x
-        self.rect.y = y
+        self.rect.x = x - self.rect.w/2
+        self.rect.y = y - self.rect.h/2
         self.x = x # float precision
         self.y = y
         TdSprite.level.all_sprites_list.add(self)
@@ -38,7 +38,7 @@ class TdSprite(pygame.sprite.Sprite):
             self.kill()
 
     def distance(self, other):
-        return math.sqrt(pow(other.rect.x-self.rect.x, 2) + pow(other.rect.y - self.rect.y, 2))
+        return math.sqrt(pow(other.x-self.x, 2) + pow(other.y - self.y, 2))
 
 class Tower(TdSprite):
     def __init__(self, x, y):
@@ -50,7 +50,7 @@ class Tower(TdSprite):
         if self.ready_to_fire:
             target = self.find_nearest_enemy(100)
             if target:
-                Projectile(self.rect.x, self.rect.y, target.rect.x, target.rect.y)
+                Projectile(self, target)
                 self.ready_to_fire = False
 
     def find_nearest_enemy(self, dist):
@@ -72,14 +72,20 @@ class Enemy(TdSprite):
 
     def update(self):
         self.x -= 0.6
-        self.rect.x = self.x
+        self.rect.x = self.x - self.rect.w/2
         self.check_bounds()
 
 
 class Projectile(TdSprite):
-    def __init__(self, x, y, tx, ty):
+    def __init__(self, tower, enemy):
+        x = tower.x
+        y = tower.y
         # Call the parent class (Sprite) constructor
         super().__init__((0,0,0), x, y, 8, 8)
+        self.enemy = enemy
+        self.tower = tower
+        tx = enemy.x
+        ty = enemy.y
         dist = pow(tx-x, 2) + pow(ty - y, 2)
         dist = math.sqrt(dist)
         self.vx = (tx-x)/dist * 3
@@ -88,6 +94,10 @@ class Projectile(TdSprite):
     def update(self):
         self.x += self.vx
         self.y += self.vy
-        self.rect.x = self.x
-        self.rect.y = self.y
+        self.rect.x = self.x - self.rect.w/2
+        self.rect.y = self.y - self.rect.h/2
         self.check_bounds()
+        if self.distance(self.enemy) < 10:
+            # ennemy hit
+            self.enemy.kill()
+            self.kill()
