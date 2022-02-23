@@ -1,6 +1,6 @@
 import pygame
 
-from tdsprite import Enemy, Tower, Ally
+from tdsprite import Enemy, Tower, Ally, Fighter
 
 
 class Level:
@@ -29,6 +29,7 @@ class Level:
         self.all_sprites_list.update()
         self.screen.fill((10,130,10))
         self.all_sprites_list.draw(self.screen)
-        for fighter in self.sprite_enemies_list:
-            fighter.draw_bar()
+        for sprite in self.all_sprites_list:
+            if isinstance(sprite, Fighter):
+                sprite.draw_bar()
         return self.carryOn
