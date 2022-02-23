@@ -8,6 +8,7 @@ WHITE = (255, 255, 255)
 class TdSprite(pygame.sprite.Sprite):
 
     level = None
+    time = 0
 
     def __init__(self, x, y):
         # Call the parent class (Sprite) constructor
@@ -15,6 +16,7 @@ class TdSprite(pygame.sprite.Sprite):
         self.x = x  # float precision
         self.y = y
         TdSprite.level.all_sprites_list.add(self)
+        self.time_for_action = TdSprite.time
 
     def construct_image(self, color, width, height):
         # Pass in the color of the car, and its x and y position, width and height.
@@ -57,14 +59,13 @@ class Tower(TdSprite):
         # Call the parent class (Sprite) constructor
         super().__init__(x, y)
         self.construct_image((255,0,0), 40,40)
-        self.ready_to_fire = True
 
     def update(self):
-        if self.ready_to_fire:
+        if TdSprite.time > self.time_for_action:
             target = self.find_nearest_target(TdSprite.level.sprite_enemies_list, 100)
             if target:
                 Projectile(self, target)
-                self.ready_to_fire = False
+                self.time_for_action = TdSprite.time + 500
 
 
 class Fighter(TdSprite):
@@ -73,6 +74,7 @@ class Fighter(TdSprite):
         self.target = None
         self.Engaged = False
         self.life = life
+        self.maxlife = life
         self.detection_range = 75
         self.target_list = None
 
@@ -84,8 +86,15 @@ class Fighter(TdSprite):
     def draw_bar(self):
         health_rect = pygame.Rect(0, 0, self.image.get_width(), 2)
         health_rect.midbottom = self.rect.centerx, self.rect.top - 2
-        pygame.draw.rect(TdSprite.level.screen, (0,255,0), health_rect)
+        pygame.draw.rect(TdSprite.level.screen, (255, 0,0), health_rect)
+        hit = self.life * self.image.get_width() / self.maxlife
+        health_rect.width = hit
+        pygame.draw.rect(TdSprite.level.screen, (0, 255, 0), health_rect)
 
+    def hit(self, points):
+        self.life -= points
+        if self.life <= 0:
+            self.kill()
 
 class Ally(Fighter):
     def __init__(self, x, y):
@@ -134,5 +143,5 @@ class Projectile(TdSprite):
         self.rect.y = self.y - self.rect.h/2
         self.check_bounds()
         if self.distance(self.target) < 10:
-            self.target.kill()
+            self.target.hit(15)
             self.kill()

@@ -1,6 +1,6 @@
 import pygame
 
-from tdsprite import Enemy, Tower, Ally, Fighter
+from tdsprite import Enemy, Tower, Ally, Fighter, TdSprite
 
 
 class Level:
@@ -26,6 +26,7 @@ class Level:
         if time > self.last_time + 2000:
             enemy = Enemy(680, 200)
             self.last_time = time
+        TdSprite.time = time
         self.all_sprites_list.update()
         self.screen.fill((10,130,10))
         self.all_sprites_list.draw(self.screen)
