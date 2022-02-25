@@ -83,13 +83,13 @@ class Fighter(TdSprite):
         if self.target:
             pass # coder rapprochement target
 
-    def draw_bar(self):
+    def draw_bar(self, surface):
         health_rect = pygame.Rect(0, 0, self.image.get_width(), 2)
         health_rect.midbottom = self.rect.centerx, self.rect.top - 2
         pygame.draw.rect(TdSprite.level.screen, (255, 0,0), health_rect)
         hit = self.life * self.image.get_width() / self.maxlife
         health_rect.width = hit
-        pygame.draw.rect(TdSprite.level.screen, (0, 255, 0), health_rect)
+        pygame.draw.rect(surface, (0, 255, 0), health_rect)
 
     def hit(self, points):
         self.life -= points
@@ -145,3 +145,17 @@ class Projectile(TdSprite):
         if self.distance(self.target) < 10:
             self.target.hit(15)
             self.kill()
+
+
+class TdGroup(pygame.sprite.Group):
+    def by_y(self, spr):
+        return spr.y + spr.rect.h
+
+    def draw(self, surface):
+        sprites = self.sprites()
+        surface_blit = surface.blit
+        for spr in sorted(sprites, key=self.by_y):
+            self.spritedict[spr] = surface_blit(spr.image, spr.rect)
+            if isinstance(spr, Fighter):
+                spr.draw_bar(surface)
+        self.lostsprites = []

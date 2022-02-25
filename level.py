@@ -1,12 +1,12 @@
 import pygame
 
-from tdsprite import Enemy, Tower, Ally, Fighter, TdSprite
+from tdsprite import Enemy, Tower, Ally, Fighter, TdSprite, TdGroup
 
 
 class Level:
     def __init__(self, screen):
         self.last_time = pygame.time.get_ticks()
-        self.all_sprites_list = pygame.sprite.Group()
+        self.all_sprites_list = TdGroup()
         self.sprite_enemies_list = pygame.sprite.Group()
         self.sprite_allies_list = pygame.sprite.Group()
         self.screen = screen
@@ -30,7 +30,4 @@ class Level:
         self.all_sprites_list.update()
         self.screen.fill((10,130,10))
         self.all_sprites_list.draw(self.screen)
-        for sprite in self.all_sprites_list:
-            if isinstance(sprite, Fighter):
-                sprite.draw_bar()
         return self.carryOn
